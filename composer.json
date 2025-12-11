@@ -1,5 +1,5 @@
 {
-    "name": "conduit-ui/prs",
+    "name": "conduit-ui/pr",
     "description": "Pull Request interface for the conduit-ui ecosystem",
     "type": "library",
     "license": "MIT",
