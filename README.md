@@ -283,7 +283,7 @@ composer analyse # Run static analysis
 
 ## Enterprise Support
 
-Automating PR workflows across your organization? Contact [jordan.woop@partridge.rocks](mailto:jordan.woop@partridge.rocks) for custom solutions including compliance checks, advanced approval rules, and audit logging.
+Automating PR workflows across your organization? Contact [jordan@partridge.rocks](mailto:jordan@partridge.rocks) for custom solutions including compliance checks, advanced approval rules, and audit logging.
 
 ## License
 
