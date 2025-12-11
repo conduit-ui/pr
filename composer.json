@@ -1,26 +1,18 @@
 {
     "name": "conduit-ui/pr",
-    "description": "Pull Request interface for the conduit-ui ecosystem",
+    "description": "Pull Request operations for the Conduit agent ecosystem",
     "type": "library",
     "license": "MIT",
+    "keywords": ["github", "pull-request", "pr", "api", "conduit-ui", "agent"],
     "authors": [
         {
             "name": "Jordan Partridge",
             "email": "jordan@partridge.rocks"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/Users/jordanpartridge/packages/connector",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
     "require": {
         "php": "^8.2",
-        "conduit-ui/connector": "dev-master"
+        "conduit-ui/connector": "^1.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
@@ -29,12 +21,12 @@
     },
     "autoload": {
         "psr-4": {
-            "ConduitUI\\Prs\\": "src/"
+            "ConduitUI\\Pr\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ConduitUI\\Prs\\Tests\\": "tests/"
+            "ConduitUI\\Pr\\Tests\\": "tests/"
         }
     },
     "scripts": {

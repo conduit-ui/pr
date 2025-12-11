@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ConduitUI\Prs\DataTransferObjects;
+namespace ConduitUI\Pr\DataTransferObjects;
 
 class Base
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use ConduitUI\Prs\DataTransferObjects\PullRequest;
+use ConduitUI\Pr\DataTransferObjects\PullRequest;
 
 it('can create a pull request from array', function () {
     $data = [

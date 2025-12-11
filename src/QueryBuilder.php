@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ConduitUI\Prs;
+namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
-use ConduitUI\Prs\DataTransferObjects\PullRequest as PullRequestData;
+use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 
 class QueryBuilder
 {

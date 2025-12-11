@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace ConduitUI\Prs;
+namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
-use ConduitUI\Prs\DataTransferObjects\Comment;
-use ConduitUI\Prs\DataTransferObjects\PullRequest as PullRequestData;
-use ConduitUI\Prs\DataTransferObjects\Review;
+use ConduitUI\Pr\DataTransferObjects\Comment;
+use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
+use ConduitUI\Pr\DataTransferObjects\Review;
 
 class PullRequest
 {
