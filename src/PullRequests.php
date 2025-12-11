@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace ConduitUI\Prs;
 
-use ConduitUI\Connector\GithubConnector;
+use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Prs\DataTransferObjects\PullRequest as PullRequestData;
 
 class PullRequests
 {
-    protected static ?GithubConnector $defaultConnector = null;
+    protected static ?Connector $defaultConnector = null;
 
     public function __construct(
-        protected GithubConnector $connector,
+        protected Connector $connector,
         protected string $owner,
         protected string $repo
     ) {
@@ -21,7 +21,7 @@ class PullRequests
     /**
      * Set the default GitHub connector for static methods
      */
-    public static function setConnector(GithubConnector $connector): void
+    public static function setConnector(Connector $connector): void
     {
         self::$defaultConnector = $connector;
     }
@@ -29,7 +29,7 @@ class PullRequests
     /**
      * Get the default connector or throw an exception
      */
-    protected static function connector(): GithubConnector
+    protected static function connector(): Connector
     {
         if (self::$defaultConnector === null) {
             throw new \RuntimeException(

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ConduitUI\Prs;
 
-use ConduitUI\Connector\GithubConnector;
+use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Prs\DataTransferObjects\PullRequest as PullRequestData;
 
 class QueryBuilder
@@ -24,7 +24,7 @@ class QueryBuilder
     protected int $page = 1;
 
     public function __construct(
-        protected GithubConnector $connector,
+        protected Connector $connector,
     ) {
     }
 

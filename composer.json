@@ -9,9 +9,18 @@
             "email": "jordan@partridge.rocks"
         }
     ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/jordanpartridge/packages/connector",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "require": {
         "php": "^8.2",
-        "conduit-ui/connector": "^1.0"
+        "conduit-ui/connector": "dev-master"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
@@ -39,6 +48,6 @@
         "preferred-install": "dist",
         "optimize-autoloader": true
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }

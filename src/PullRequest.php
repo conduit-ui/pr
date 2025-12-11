@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ConduitUI\Prs;
 
-use ConduitUI\Connector\GithubConnector;
+use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Prs\DataTransferObjects\Comment;
 use ConduitUI\Prs\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Prs\DataTransferObjects\Review;
@@ -12,7 +12,7 @@ use ConduitUI\Prs\DataTransferObjects\Review;
 class PullRequest
 {
     public function __construct(
-        protected GithubConnector $connector,
+        protected Connector $connector,
         protected string $owner,
         protected string $repo,
         public readonly PullRequestData $data,

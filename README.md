@@ -15,11 +15,11 @@ composer require conduit-ui/prs
 The static API provides a clean, expressive interface for working with pull requests:
 
 ```php
-use ConduitUI\Connector\GithubConnector;
+use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Prs\PullRequests;
 
 // Configure once
-PullRequests::setConnector(new GithubConnector('your-github-token'));
+PullRequests::setConnector(new Connector('your-github-token'));
 
 // Find a specific PR
 $pr = PullRequests::find('owner/repo', 123);
@@ -57,10 +57,10 @@ $prs = PullRequests::query()
 For more traditional object-oriented usage:
 
 ```php
-use ConduitUI\Connector\GithubConnector;
+use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Prs\PullRequests;
 
-$connector = new GithubConnector('your-github-token');
+$connector = new Connector('your-github-token');
 $prs = new PullRequests($connector, 'owner', 'repo');
 
 // Get a specific pull request
