@@ -16,6 +16,7 @@ use ConduitUI\Pr\Requests\GetCommitCheckRuns;
 use ConduitUI\Pr\Requests\GetIssueComments;
 use ConduitUI\Pr\Requests\GetPullRequestComments;
 use ConduitUI\Pr\Requests\GetPullRequestCommits;
+use ConduitUI\Pr\Requests\GetPullRequestDiff;
 use ConduitUI\Pr\Requests\GetPullRequestFiles;
 use ConduitUI\Pr\Requests\GetPullRequestReviews;
 use ConduitUI\Pr\Requests\MergePullRequest;
@@ -189,6 +190,20 @@ class PullRequest
         ));
 
         return array_values($response->json());
+    }
+
+    /**
+     * Get the raw diff text for this pull request.
+     */
+    public function diff(): string
+    {
+        $response = $this->connector->send(new GetPullRequestDiff(
+            $this->owner,
+            $this->repo,
+            $this->data->number
+        ));
+
+        return $response->body();
     }
 
     /**

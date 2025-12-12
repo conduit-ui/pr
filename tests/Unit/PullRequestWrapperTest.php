@@ -11,7 +11,7 @@ use Saloon\Http\Response;
 
 class MockResponse extends Response
 {
-    public function __construct(private array $data)
+    public function __construct(private array $data, private ?string $bodyContent = null)
     {
         // Skip parent constructor
     }
@@ -24,6 +24,11 @@ class MockResponse extends Response
 
         return $this->data;
     }
+
+    public function body(): string
+    {
+        return $this->bodyContent ?? '';
+    }
 }
 
 class TestConnector extends Connector
@@ -31,7 +36,7 @@ class TestConnector extends Connector
     private int $callIndex = 0;
 
     /**
-     * @param  array<int, array<string, mixed>>  $responses
+     * @param  array<int, array<string, mixed>|string>  $responses
      */
     public function __construct(private array $responses = [])
     {
@@ -40,9 +45,14 @@ class TestConnector extends Connector
 
     public function send(Request $request, ...$args): Response
     {
-        $responseData = $this->responses[$this->callIndex++] ?? [];
+        $response = $this->responses[$this->callIndex++] ?? [];
 
-        return new MockResponse($responseData);
+        // If response is a string, treat it as body content
+        if (is_string($response)) {
+            return new MockResponse([], $response);
+        }
+
+        return new MockResponse($response);
     }
 }
 
@@ -279,4 +289,27 @@ it('paginates issue comments across multiple pages', function () {
         ->and($comments[99]->id)->toBe(100)
         ->and($comments[100]->id)->toBe(101)
         ->and($comments[124]->id)->toBe(125);
+});
+
+it('can get diff from pull request', function () {
+    $mockDiff = <<<'DIFF'
+diff --git a/file.php b/file.php
+index abc123..def456 100644
+--- a/file.php
++++ b/file.php
+@@ -1,3 +1,4 @@
+ <?php
++echo "Hello World";
+
+DIFF;
+
+    $connector = createMockConnector([$mockDiff]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $diff = $pr->diff();
+
+    expect($diff)->toBeString()
+        ->and($diff)->toContain('diff --git')
+        ->and($diff)->toContain('echo "Hello World"');
 });
