@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use ConduitUi\GitHubConnector\Connector;
+use ConduitUI\Pr\DataTransferObjects\CheckRun;
 use ConduitUI\Pr\DataTransferObjects\Comment;
+use ConduitUI\Pr\DataTransferObjects\Commit;
+use ConduitUI\Pr\DataTransferObjects\File;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\PullRequest;
 use Saloon\Http\Request;
@@ -124,13 +127,35 @@ it('can get commits from pull request', function () {
             'sha' => 'commit1',
             'commit' => [
                 'message' => 'First commit',
+                'author' => [
+                    'name' => 'Author 1',
+                    'email' => 'author1@example.com',
+                    'date' => '2025-01-01T10:00:00Z',
+                ],
+                'committer' => [
+                    'name' => 'Committer 1',
+                    'email' => 'committer1@example.com',
+                    'date' => '2025-01-01T10:05:00Z',
+                ],
             ],
+            'html_url' => 'https://github.com/owner/repo/commit/commit1',
         ],
         [
             'sha' => 'commit2',
             'commit' => [
                 'message' => 'Second commit',
+                'author' => [
+                    'name' => 'Author 2',
+                    'email' => 'author2@example.com',
+                    'date' => '2025-01-01T11:00:00Z',
+                ],
+                'committer' => [
+                    'name' => 'Committer 2',
+                    'email' => 'committer2@example.com',
+                    'date' => '2025-01-01T11:05:00Z',
+                ],
             ],
+            'html_url' => 'https://github.com/owner/repo/commit/commit2',
         ],
     ];
 
@@ -142,8 +167,12 @@ it('can get commits from pull request', function () {
 
     expect($commits)->toBeArray()
         ->and($commits)->toHaveCount(2)
-        ->and($commits[0]['sha'])->toBe('commit1')
-        ->and($commits[1]['sha'])->toBe('commit2');
+        ->and($commits[0])->toBeInstanceOf(Commit::class)
+        ->and($commits[0]->sha)->toBe('commit1')
+        ->and($commits[0]->message)->toBe('First commit')
+        ->and($commits[1])->toBeInstanceOf(Commit::class)
+        ->and($commits[1]->sha)->toBe('commit2')
+        ->and($commits[1]->message)->toBe('Second commit');
 });
 
 it('returns empty array when no commits', function () {
@@ -220,13 +249,39 @@ it('paginates commits across multiple pages', function () {
     // First page: 100 commits (full page triggers next request)
     $page1 = array_map(fn ($i) => [
         'sha' => "commit-page1-{$i}",
-        'commit' => ['message' => "Commit {$i}"],
+        'commit' => [
+            'message' => "Commit {$i}",
+            'author' => [
+                'name' => "Author {$i}",
+                'email' => "author{$i}@example.com",
+                'date' => '2025-01-01T10:00:00Z',
+            ],
+            'committer' => [
+                'name' => "Committer {$i}",
+                'email' => "committer{$i}@example.com",
+                'date' => '2025-01-01T10:05:00Z',
+            ],
+        ],
+        'html_url' => "https://github.com/owner/repo/commit/commit-page1-{$i}",
     ], range(1, 100));
 
     // Second page: 50 commits (partial page, stops pagination)
     $page2 = array_map(fn ($i) => [
         'sha' => "commit-page2-{$i}",
-        'commit' => ['message' => "Commit {$i}"],
+        'commit' => [
+            'message' => "Commit {$i}",
+            'author' => [
+                'name' => "Author {$i}",
+                'email' => "author{$i}@example.com",
+                'date' => '2025-01-01T10:00:00Z',
+            ],
+            'committer' => [
+                'name' => "Committer {$i}",
+                'email' => "committer{$i}@example.com",
+                'date' => '2025-01-01T10:05:00Z',
+            ],
+        ],
+        'html_url' => "https://github.com/owner/repo/commit/commit-page2-{$i}",
     ], range(1, 50));
 
     $connector = createMockConnector([$page1, $page2]);
@@ -237,10 +292,14 @@ it('paginates commits across multiple pages', function () {
 
     expect($commits)->toBeArray()
         ->and($commits)->toHaveCount(150)
-        ->and($commits[0]['sha'])->toBe('commit-page1-1')
-        ->and($commits[99]['sha'])->toBe('commit-page1-100')
-        ->and($commits[100]['sha'])->toBe('commit-page2-1')
-        ->and($commits[149]['sha'])->toBe('commit-page2-50');
+        ->and($commits[0])->toBeInstanceOf(Commit::class)
+        ->and($commits[0]->sha)->toBe('commit-page1-1')
+        ->and($commits[99])->toBeInstanceOf(Commit::class)
+        ->and($commits[99]->sha)->toBe('commit-page1-100')
+        ->and($commits[100])->toBeInstanceOf(Commit::class)
+        ->and($commits[100]->sha)->toBe('commit-page2-1')
+        ->and($commits[149])->toBeInstanceOf(Commit::class)
+        ->and($commits[149]->sha)->toBe('commit-page2-50');
 });
 
 it('paginates issue comments across multiple pages', function () {
@@ -312,4 +371,108 @@ DIFF;
     expect($diff)->toBeString()
         ->and($diff)->toContain('diff --git')
         ->and($diff)->toContain('echo "Hello World"');
+    $mockFiles = [
+        [
+            'sha' => 'abc123',
+            'filename' => 'src/Example.php',
+            'status' => 'modified',
+            'additions' => 10,
+            'deletions' => 5,
+            'changes' => 15,
+            'blob_url' => 'https://github.com/owner/repo/blob/abc123/src/Example.php',
+            'raw_url' => 'https://github.com/owner/repo/raw/abc123/src/Example.php',
+            'contents_url' => 'https://api.github.com/repos/owner/repo/contents/src/Example.php',
+            'patch' => '@@ -1,5 +1,10 @@',
+        ],
+        [
+            'sha' => 'def456',
+            'filename' => 'tests/ExampleTest.php',
+            'status' => 'added',
+            'additions' => 20,
+            'deletions' => 0,
+            'changes' => 20,
+            'blob_url' => 'https://github.com/owner/repo/blob/def456/tests/ExampleTest.php',
+            'raw_url' => 'https://github.com/owner/repo/raw/def456/tests/ExampleTest.php',
+            'contents_url' => 'https://api.github.com/repos/owner/repo/contents/tests/ExampleTest.php',
+            'patch' => '@@ -0,0 +1,20 @@',
+        ],
+    ];
+
+    $connector = createMockConnector([$mockFiles]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $files = $pr->files();
+
+    expect($files)->toBeArray()
+        ->and($files)->toHaveCount(2)
+        ->and($files[0])->toBeInstanceOf(File::class)
+        ->and($files[0]->filename)->toBe('src/Example.php')
+        ->and($files[0]->status)->toBe('modified')
+        ->and($files[0]->additions)->toBe(10)
+        ->and($files[1])->toBeInstanceOf(File::class)
+        ->and($files[1]->filename)->toBe('tests/ExampleTest.php')
+        ->and($files[1]->status)->toBe('added');
+});
+
+it('returns empty array when no files', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $files = $pr->files();
+
+    expect($files)->toBeArray()
+        ->and($files)->toBeEmpty();
+});
+
+it('can get checks from pull request', function () {
+    $mockChecks = [
+        'check_runs' => [
+            [
+                'id' => 1,
+                'name' => 'PHPStan',
+                'status' => 'completed',
+                'conclusion' => 'success',
+                'html_url' => 'https://github.com/owner/repo/runs/1',
+                'started_at' => '2025-01-01T10:00:00Z',
+                'completed_at' => '2025-01-01T10:05:00Z',
+            ],
+            [
+                'id' => 2,
+                'name' => 'Pest',
+                'status' => 'completed',
+                'conclusion' => 'failure',
+                'html_url' => 'https://github.com/owner/repo/runs/2',
+                'started_at' => '2025-01-01T10:01:00Z',
+                'completed_at' => '2025-01-01T10:06:00Z',
+            ],
+        ],
+    ];
+
+    $connector = createMockConnector([$mockChecks]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $checks = $pr->checks();
+
+    expect($checks)->toBeArray()
+        ->and($checks)->toHaveCount(2)
+        ->and($checks[0])->toBeInstanceOf(CheckRun::class)
+        ->and($checks[0]->name)->toBe('PHPStan')
+        ->and($checks[0]->conclusion)->toBe('success')
+        ->and($checks[1])->toBeInstanceOf(CheckRun::class)
+        ->and($checks[1]->name)->toBe('Pest')
+        ->and($checks[1]->conclusion)->toBe('failure');
+});
+
+it('returns empty array when no checks', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $checks = $pr->checks();
+
+    expect($checks)->toBeArray()
+        ->and($checks)->toBeEmpty();
 });

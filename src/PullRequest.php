@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
+use ConduitUI\Pr\DataTransferObjects\CheckRun;
 use ConduitUI\Pr\DataTransferObjects\Comment;
+use ConduitUI\Pr\DataTransferObjects\Commit;
+use ConduitUI\Pr\DataTransferObjects\File;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\DataTransferObjects\Review;
 use ConduitUI\Pr\Requests\AddIssueLabels;
@@ -182,7 +185,7 @@ class PullRequest
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return array<int, File>
      */
     public function files(): array
     {
@@ -192,10 +195,14 @@ class PullRequest
             $this->data->number
         ));
 
-        return array_values($response->json());
+        return array_values(array_map(
+            fn (array $data) => File::fromArray($data),
+            $response->json()
+        ));
     }
 
     /**
+/**
      * Get the raw diff text for this pull request.
      */
     public function diff(): string
@@ -210,7 +217,7 @@ class PullRequest
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return array<int, CheckRun>
      */
     public function checks(): array
     {
@@ -220,13 +227,18 @@ class PullRequest
             $this->data->head->sha
         ));
 
-        return $response->json()['check_runs'] ?? [];
+        $checkRuns = $response->json()['check_runs'] ?? [];
+
+        return array_values(array_map(
+            fn (array $data) => CheckRun::fromArray($data),
+            $checkRuns
+        ));
     }
 
     /**
      * Get all commits in this pull request (paginated, fetches all pages).
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, Commit>
      */
     public function commits(): array
     {
@@ -253,7 +265,10 @@ class PullRequest
             $page++;
         } while (count($commits) === $perPage);
 
-        return array_values($allCommits);
+        return array_values(array_map(
+            fn (array $data) => Commit::fromArray($data),
+            $allCommits
+        ));
     }
 
     /**
