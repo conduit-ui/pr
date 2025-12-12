@@ -35,25 +35,28 @@ class PullRequest
 
     public function approve(?string $body = null): self
     {
-        $this->connector->send(new CreatePullRequestReview(
-            $this->owner,
-            $this->repo,
-            $this->data->number,
-            'APPROVE',
-            $body
-        ));
-
-        return $this;
+        return $this->submitReview('APPROVE', $body);
     }
 
     public function requestChanges(string $body): self
+    {
+        return $this->submitReview('REQUEST_CHANGES', $body);
+    }
+
+    /**
+     * Submit a review with optional inline comments.
+     *
+     * @param  array<int, array{path: string, line: int, body: string}>  $comments
+     */
+    public function submitReview(string $event, ?string $body = null, array $comments = []): self
     {
         $this->connector->send(new CreatePullRequestReview(
             $this->owner,
             $this->repo,
             $this->data->number,
-            'REQUEST_CHANGES',
-            $body
+            $event,
+            $body,
+            $comments
         ));
 
         return $this;

@@ -15,12 +15,16 @@ class CreatePullRequestReview extends Request implements HasBody
 
     protected Method $method = Method::POST;
 
+    /**
+     * @param  array<int, array{path: string, line: int, body: string}>  $comments
+     */
     public function __construct(
         protected string $owner,
         protected string $repo,
         protected int $number,
         protected string $event,
-        protected ?string $body = null,
+        protected ?string $reviewBody = null,
+        protected array $comments = [],
     ) {}
 
     public function resolveEndpoint(): string
@@ -35,8 +39,12 @@ class CreatePullRequestReview extends Request implements HasBody
     {
         $payload = ['event' => $this->event];
 
-        if ($this->body !== null) {
-            $payload['body'] = $this->body;
+        if ($this->reviewBody !== null) {
+            $payload['body'] = $this->reviewBody;
+        }
+
+        if (! empty($this->comments)) {
+            $payload['comments'] = $this->comments;
         }
 
         return $payload;
