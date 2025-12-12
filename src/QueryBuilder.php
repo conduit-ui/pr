@@ -6,6 +6,7 @@ namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
+use ConduitUI\Pr\Requests\ListPullRequests;
 
 class QueryBuilder
 {
@@ -13,6 +14,9 @@ class QueryBuilder
 
     protected ?string $repo = null;
 
+    /**
+     * @var array<string, mixed>
+     */
     protected array $filters = [];
 
     protected string $sort = 'created';
@@ -25,8 +29,7 @@ class QueryBuilder
 
     public function __construct(
         protected Connector $connector,
-    ) {
-    }
+    ) {}
 
     public function repository(string $repository): self
     {
@@ -93,6 +96,9 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * @return array<int, PullRequest>
+     */
     public function get(): array
     {
         if (! $this->owner || ! $this->repo) {
@@ -110,19 +116,21 @@ class QueryBuilder
             $params['state'] = 'open';
         }
 
-        $response = $this->connector->get(
-            "/repos/{$this->owner}/{$this->repo}/pulls?" . http_build_query($params)
-        );
+        $response = $this->connector->send(new ListPullRequests(
+            $this->owner,
+            $this->repo,
+            $params
+        ));
 
-        return array_map(
+        return array_values(array_map(
             fn (array $data) => new PullRequest(
                 $this->connector,
                 $this->owner,
                 $this->repo,
                 PullRequestData::fromArray($data)
             ),
-            $response
-        );
+            $response->json()
+        ));
     }
 
     public function first(): ?PullRequest

@@ -3,4 +3,6 @@ parameters:
     paths:
         - src
     tmpDir: build/phpstan
-    checkMissingIterableValueType: false
+    ignoreErrors:
+        -
+            identifier: missingType.iterableValue
