@@ -206,37 +206,71 @@ class PullRequest
     }
 
     /**
-     * Get all commits in this pull request.
+     * Get all commits in this pull request (paginated, fetches all pages).
      *
      * @return array<int, array<string, mixed>>
      */
     public function commits(): array
     {
-        $response = $this->connector->send(new GetPullRequestCommits(
-            $this->owner,
-            $this->repo,
-            $this->data->number
-        ));
+        $allCommits = [];
+        $page = 1;
+        $perPage = 100;
 
-        return array_values($response->json());
+        do {
+            $response = $this->connector->send(new GetPullRequestCommits(
+                $this->owner,
+                $this->repo,
+                $this->data->number,
+                $perPage,
+                $page
+            ));
+
+            $commits = $response->json();
+
+            if (empty($commits)) {
+                break;
+            }
+
+            $allCommits = array_merge($allCommits, $commits);
+            $page++;
+        } while (count($commits) === $perPage);
+
+        return array_values($allCommits);
     }
 
     /**
-     * Get all issue comments (discussion thread) for this pull request.
+     * Get all issue comments (discussion thread) for this pull request (paginated, fetches all pages).
      *
      * @return array<int, Comment>
      */
     public function issueComments(): array
     {
-        $response = $this->connector->send(new GetIssueComments(
-            $this->owner,
-            $this->repo,
-            $this->data->number
-        ));
+        $allComments = [];
+        $page = 1;
+        $perPage = 100;
+
+        do {
+            $response = $this->connector->send(new GetIssueComments(
+                $this->owner,
+                $this->repo,
+                $this->data->number,
+                $perPage,
+                $page
+            ));
+
+            $comments = $response->json();
+
+            if (empty($comments)) {
+                break;
+            }
+
+            $allComments = array_merge($allComments, $comments);
+            $page++;
+        } while (count($comments) === $perPage);
 
         return array_values(array_map(
             fn (array $data) => Comment::fromArray($data),
-            $response->json()
+            $allComments
         ));
     }
 

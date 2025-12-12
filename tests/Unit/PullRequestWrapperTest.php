@@ -205,3 +205,78 @@ it('returns empty array when no issue comments', function () {
     expect($comments)->toBeArray()
         ->and($comments)->toBeEmpty();
 });
+
+it('paginates commits across multiple pages', function () {
+    // First page: 100 commits (full page triggers next request)
+    $page1 = array_map(fn ($i) => [
+        'sha' => "commit-page1-{$i}",
+        'commit' => ['message' => "Commit {$i}"],
+    ], range(1, 100));
+
+    // Second page: 50 commits (partial page, stops pagination)
+    $page2 = array_map(fn ($i) => [
+        'sha' => "commit-page2-{$i}",
+        'commit' => ['message' => "Commit {$i}"],
+    ], range(1, 50));
+
+    $connector = createMockConnector([$page1, $page2]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $commits = $pr->commits();
+
+    expect($commits)->toBeArray()
+        ->and($commits)->toHaveCount(150)
+        ->and($commits[0]['sha'])->toBe('commit-page1-1')
+        ->and($commits[99]['sha'])->toBe('commit-page1-100')
+        ->and($commits[100]['sha'])->toBe('commit-page2-1')
+        ->and($commits[149]['sha'])->toBe('commit-page2-50');
+});
+
+it('paginates issue comments across multiple pages', function () {
+    // First page: 100 comments
+    $page1 = array_map(fn ($i) => [
+        'id' => $i,
+        'user' => [
+            'id' => 1,
+            'login' => 'user',
+            'avatar_url' => 'https://example.com/avatar.jpg',
+            'html_url' => 'https://github.com/user',
+            'type' => 'User',
+        ],
+        'body' => "Comment {$i}",
+        'html_url' => "https://github.com/owner/repo/issues/123#issuecomment-{$i}",
+        'created_at' => '2025-01-01T10:00:00Z',
+        'updated_at' => '2025-01-01T10:00:00Z',
+    ], range(1, 100));
+
+    // Second page: 25 comments
+    $page2 = array_map(fn ($i) => [
+        'id' => 100 + $i,
+        'user' => [
+            'id' => 1,
+            'login' => 'user',
+            'avatar_url' => 'https://example.com/avatar.jpg',
+            'html_url' => 'https://github.com/user',
+            'type' => 'User',
+        ],
+        'body' => 'Comment '.(100 + $i),
+        'html_url' => 'https://github.com/owner/repo/issues/123#issuecomment-'.(100 + $i),
+        'created_at' => '2025-01-01T10:00:00Z',
+        'updated_at' => '2025-01-01T10:00:00Z',
+    ], range(1, 25));
+
+    $connector = createMockConnector([$page1, $page2]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $comments = $pr->issueComments();
+
+    expect($comments)->toBeArray()
+        ->and($comments)->toHaveCount(125)
+        ->and($comments[0])->toBeInstanceOf(Comment::class)
+        ->and($comments[0]->id)->toBe(1)
+        ->and($comments[99]->id)->toBe(100)
+        ->and($comments[100]->id)->toBe(101)
+        ->and($comments[124]->id)->toBe(125);
+});

@@ -15,10 +15,12 @@ class GetPullRequestCommits extends Request
         protected string $owner,
         protected string $repo,
         protected int $number,
+        protected int $perPage = 100,
+        protected int $page = 1,
     ) {}
 
     public function resolveEndpoint(): string
     {
-        return "/repos/{$this->owner}/{$this->repo}/pulls/{$this->number}/commits";
+        return "/repos/{$this->owner}/{$this->repo}/pulls/{$this->number}/commits?per_page={$this->perPage}&page={$this->page}";
     }
 }
