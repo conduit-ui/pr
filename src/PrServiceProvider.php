@@ -22,11 +22,9 @@ class PrServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(PrServiceInterface::class, function ($app) {
-            $token = $app['config']->get('pr.github.token')
-                ?? $app['config']->get('services.github.token')
-                ?? env('GITHUB_TOKEN');
+            $token = $this->resolveToken($app);
 
-            if (! $token) {
+            if ($token === null) {
                 throw new \RuntimeException(
                     'GitHub token not configured. Set GITHUB_TOKEN environment variable or publish and configure the pr.php config file.'
                 );
@@ -51,8 +49,32 @@ class PrServiceProvider extends ServiceProvider
             ], 'pr-config');
         }
 
-        // Auto-configure the PullRequests facade
-        $service = $this->app->make(PrServiceInterface::class);
-        PullRequests::setService($service);
+        // Auto-configure the PullRequests facade only if token is available
+        // This prevents crashing apps that don't need PR functionality
+        if ($this->resolveToken($this->app) !== null) {
+            PullRequests::setService($this->app->make(PrServiceInterface::class));
+        }
+    }
+
+    /**
+     * Resolve the GitHub token from available configuration sources.
+     *
+     * @param  \Illuminate\Contracts\Foundation\Application  $app
+     */
+    private function resolveToken($app): ?string
+    {
+        $sources = [
+            $app['config']->get('pr.github.token'),
+            $app['config']->get('services.github.token'),
+            env('GITHUB_TOKEN'),
+        ];
+
+        foreach ($sources as $token) {
+            if (is_string($token) && trim($token) !== '') {
+                return trim($token);
+            }
+        }
+
+        return null;
     }
 }
