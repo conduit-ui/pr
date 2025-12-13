@@ -13,6 +13,9 @@ class Head
         public readonly Repository $repo,
     ) {}
 
+    /**
+     * @param  array{ref: string, sha: string, user: array{id: int, login: string, avatar_url: string, html_url: string, type: string}, repo: array{id: int, name: string, full_name: string, html_url: string, private: bool}}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -23,6 +26,9 @@ class Head
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

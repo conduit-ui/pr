@@ -17,6 +17,9 @@ class Review
         public readonly DateTimeImmutable $submittedAt,
     ) {}
 
+    /**
+     * @param  array{id: int, user: array{id: int, login: string, avatar_url: string, html_url: string, type: string}, body?: string|null, state: string, html_url: string, submitted_at: string}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -44,6 +47,9 @@ class Review
         return $this->state === 'COMMENTED';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

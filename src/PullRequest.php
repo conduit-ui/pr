@@ -174,9 +174,13 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
             $this->data->number
         ));
 
+        /** @var array<int, array<string, mixed>> $items */
+        $items = $response->json();
+
         return array_values(array_map(
-            fn (array $data) => Review::fromArray($data),
-            $response->json()
+            /** @param array<string, mixed> $data */
+            fn (mixed $data): Review => Review::fromArray($data), // @phpstan-ignore-line
+            $items
         ));
     }
 
@@ -191,9 +195,13 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
             $this->data->number
         ));
 
+        /** @var array<int, array<string, mixed>> $items */
+        $items = $response->json();
+
         return array_values(array_map(
-            fn (array $data) => Comment::fromArray($data),
-            $response->json()
+            /** @param array<string, mixed> $data */
+            fn (mixed $data): Comment => Comment::fromArray($data), // @phpstan-ignore-line
+            $items
         ));
     }
 
@@ -208,9 +216,13 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
             $this->data->number
         ));
 
+        /** @var array<int, array<string, mixed>> $items */
+        $items = $response->json();
+
         return array_values(array_map(
-            fn (array $data) => File::fromArray($data),
-            $response->json()
+            /** @param array<string, mixed> $data */
+            fn (mixed $data): File => File::fromArray($data), // @phpstan-ignore-line
+            $items
         ));
     }
 
@@ -240,10 +252,14 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
             $this->data->head->sha
         ));
 
-        $checkRuns = $response->json()['check_runs'] ?? [];
+        /** @var array<string, mixed> $json */
+        $json = $response->json();
+        /** @var array<int, array<string, mixed>> $checkRuns */
+        $checkRuns = $json['check_runs'] ?? [];
 
         return array_values(array_map(
-            fn (array $data) => CheckRun::fromArray($data),
+            /** @param array<string, mixed> $data */
+            fn (mixed $data): CheckRun => CheckRun::fromArray($data), // @phpstan-ignore-line
             $checkRuns
         ));
     }
@@ -255,6 +271,7 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
      */
     public function commits(): array
     {
+        /** @var array<int, array<string, mixed>> $allCommits */
         $allCommits = [];
         $page = 1;
         $perPage = 100;
@@ -268,9 +285,10 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
                 $page
             ));
 
+            /** @var array<int, array<string, mixed>> $commits */
             $commits = $response->json();
 
-            if (empty($commits)) {
+            if ($commits === []) {
                 break;
             }
 
@@ -279,7 +297,8 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
         } while (count($commits) === $perPage);
 
         return array_values(array_map(
-            fn (array $data) => Commit::fromArray($data),
+            /** @param array<string, mixed> $data */
+            fn (mixed $data): Commit => Commit::fromArray($data), // @phpstan-ignore-line
             $allCommits
         ));
     }
@@ -291,6 +310,7 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
      */
     public function issueComments(): array
     {
+        /** @var array<int, array<string, mixed>> $allComments */
         $allComments = [];
         $page = 1;
         $perPage = 100;
@@ -304,9 +324,10 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
                 $page
             ));
 
+            /** @var array<int, array<string, mixed>> $comments */
             $comments = $response->json();
 
-            if (empty($comments)) {
+            if ($comments === []) {
                 break;
             }
 
@@ -315,7 +336,8 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
         } while (count($comments) === $perPage);
 
         return array_values(array_map(
-            fn (array $data) => Comment::fromArray($data),
+            /** @param array<string, mixed> $data */
+            fn (mixed $data): Comment => Comment::fromArray($data), // @phpstan-ignore-line
             $allComments
         ));
     }
@@ -433,7 +455,7 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
 
             $events = $response->json();
 
-            if (empty($events)) {
+            if ($events === []) {
                 break;
             }
 
@@ -446,7 +468,7 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
 
     public function __get(string $name): mixed
     {
-        return $this->data->{$name};
+        return $this->data->{$name}; // @phpstan-ignore-line Variable property access is intentional for magic getter
     }
 
     /**

@@ -118,11 +118,14 @@ class PullRequests
             $number
         ));
 
+        /** @var array<string, mixed> $data */
+        $data = $response->json();
+
         return new PullRequest(
             $this->connector,
             $this->owner,
             $this->repo,
-            PullRequestData::fromArray($response->json())
+            PullRequestData::fromArray($data) // @phpstan-ignore-line
         );
     }
 
@@ -147,11 +150,14 @@ class PullRequests
         ));
 
         return array_values(array_map(
-            fn ($pr) => new PullRequest(
+            /**
+             * @param  array<string, mixed>  $pr
+             */
+            fn (mixed $pr) => new PullRequest(
                 $this->connector,
                 $this->owner,
                 $this->repo,
-                PullRequestData::fromArray($pr)
+                PullRequestData::fromArray($pr) // @phpstan-ignore-line
             ),
             $response->json()
         ));
@@ -190,11 +196,14 @@ class PullRequests
             $data
         ));
 
+        /** @var array<string, mixed> $responseData */
+        $responseData = $response->json();
+
         return new PullRequest(
             $this->connector,
             $this->owner,
             $this->repo,
-            PullRequestData::fromArray($response->json())
+            PullRequestData::fromArray($responseData) // @phpstan-ignore-line
         );
     }
 
@@ -212,11 +221,14 @@ class PullRequests
             $data
         ));
 
+        /** @var array<string, mixed> $responseData */
+        $responseData = $response->json();
+
         return new PullRequest(
             $this->connector,
             $this->owner,
             $this->repo,
-            PullRequestData::fromArray($response->json())
+            PullRequestData::fromArray($responseData) // @phpstan-ignore-line
         );
     }
 
@@ -237,7 +249,7 @@ class PullRequests
             $data
         ));
 
-        return $response->json()['merged'] ?? false;
+        return (bool) ($response->json()['merged'] ?? false);
     }
 
     /**

@@ -18,6 +18,9 @@ class CheckRun
         public readonly ?DateTimeImmutable $completedAt,
     ) {}
 
+    /**
+     * @param  array{id: int, name: string, status: string, conclusion: string|null, html_url: string, started_at: string, completed_at?: string|null}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -43,9 +46,12 @@ class CheckRun
 
     public function isFailed(): bool
     {
-        return in_array($this->conclusion, ['failure', 'timed_out', 'action_required']);
+        return in_array($this->conclusion, ['failure', 'timed_out', 'action_required'], true);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

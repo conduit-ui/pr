@@ -13,6 +13,9 @@ class Label
         public readonly ?string $description,
     ) {}
 
+    /**
+     * @param  array{id: int, name: string, color: string, description?: string|null}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -23,6 +26,9 @@ class Label
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

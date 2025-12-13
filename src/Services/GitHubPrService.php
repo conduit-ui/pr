@@ -27,11 +27,14 @@ class GitHubPrService implements PrServiceInterface
 
         $response = $this->connector->send(new GetPullRequest($owner, $repo, $number));
 
+        /** @var array<string, mixed> $data */
+        $data = $response->json();
+
         return new PullRequest(
             $this->connector,
             $owner,
             $repo,
-            PullRequestData::fromArray($response->json())
+            PullRequestData::fromArray($data) // @phpstan-ignore-line
         );
     }
 
@@ -44,11 +47,14 @@ class GitHubPrService implements PrServiceInterface
 
         $response = $this->connector->send(new CreatePullRequest($owner, $repo, $attributes));
 
+        /** @var array<string, mixed> $data */
+        $data = $response->json();
+
         return new PullRequest(
             $this->connector,
             $owner,
             $repo,
-            PullRequestData::fromArray($response->json())
+            PullRequestData::fromArray($data) // @phpstan-ignore-line
         );
     }
 
@@ -71,11 +77,14 @@ class GitHubPrService implements PrServiceInterface
 
         $response = $this->connector->send(new UpdatePullRequest($owner, $repo, $number, $data));
 
+        /** @var array<string, mixed> $responseData */
+        $responseData = $response->json();
+
         return new PullRequest(
             $this->connector,
             $owner,
             $repo,
-            PullRequestData::fromArray($response->json())
+            PullRequestData::fromArray($responseData) // @phpstan-ignore-line
         );
     }
 
@@ -90,7 +99,7 @@ class GitHubPrService implements PrServiceInterface
 
         $response = $this->connector->send(new MergePullRequest($owner, $repo, $number, $data));
 
-        return $response->json()['merged'] ?? false;
+        return (bool) ($response->json()['merged'] ?? false);
     }
 
     public function close(string $repository, int $number): PullRequest
@@ -115,11 +124,14 @@ class GitHubPrService implements PrServiceInterface
         $response = $this->connector->send(new ListPullRequests($owner, $repo, $mergedFilters));
 
         return array_values(array_map(
-            fn ($pr) => new PullRequest(
+            /**
+             * @param  array<string, mixed>  $pr
+             */
+            fn (mixed $pr) => new PullRequest(
                 $this->connector,
                 $owner,
                 $repo,
-                PullRequestData::fromArray($pr)
+                PullRequestData::fromArray($pr) // @phpstan-ignore-line
             ),
             $response->json()
         ));

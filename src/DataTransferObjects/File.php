@@ -20,6 +20,9 @@ class File
         public readonly ?string $previousFilename,
     ) {}
 
+    /**
+     * @param  array{sha: string, filename: string, status: string, additions: int, deletions: int, changes: int, blob_url: string, raw_url: string, contents_url: string, patch?: string|null, previous_filename?: string|null}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -57,6 +60,9 @@ class File
         return $this->status === 'renamed';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

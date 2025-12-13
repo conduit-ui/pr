@@ -39,11 +39,11 @@ class RemoveReviewers extends Request implements HasBody
     {
         $payload = [];
 
-        if (! empty($this->reviewers)) {
+        if ($this->reviewers !== []) {
             $payload['reviewers'] = $this->reviewers;
         }
 
-        if (! empty($this->teamReviewers)) {
+        if ($this->teamReviewers !== []) {
             $payload['team_reviewers'] = $this->teamReviewers;
         }
 

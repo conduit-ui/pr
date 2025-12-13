@@ -14,6 +14,9 @@ class CommitAuthor
         public readonly DateTimeImmutable $date,
     ) {}
 
+    /**
+     * @param  array{name: string, email: string, date: string}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -23,6 +26,9 @@ class CommitAuthor
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

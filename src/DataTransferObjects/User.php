@@ -14,6 +14,9 @@ class User
         public readonly string $type,
     ) {}
 
+    /**
+     * @param  array{id: int, login: string, avatar_url: string, html_url: string, type: string}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -25,6 +28,9 @@ class User
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
