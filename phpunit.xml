@@ -17,6 +17,7 @@
         </include>
         <exclude>
             <file>src/PrServiceProvider.php</file>
+            <directory>src/Contracts</directory>
         </exclude>
     </source>
 </phpunit>
