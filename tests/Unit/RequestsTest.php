@@ -177,3 +177,120 @@ it('RemoveReviewers handles empty team reviewers', function () {
 
     expect($request->resolveEndpoint())->toBe('/repos/owner/repo/pulls/123/requested_reviewers');
 });
+
+// Body method tests
+it('AddAssignees has correct body', function () {
+    $request = new AddAssignees('owner', 'repo', 123, ['user1', 'user2']);
+
+    expect($request->body()->all())->toBe(['assignees' => ['user1', 'user2']]);
+});
+
+it('RemoveAssignees has correct body', function () {
+    $request = new RemoveAssignees('owner', 'repo', 123, ['user1']);
+
+    expect($request->body()->all())->toBe(['assignees' => ['user1']]);
+});
+
+it('AddIssueLabels has correct body', function () {
+    $request = new AddIssueLabels('owner', 'repo', 123, ['bug', 'enhancement']);
+
+    expect($request->body()->all())->toBe(['labels' => ['bug', 'enhancement']]);
+});
+
+it('CreateIssueComment has correct body', function () {
+    $request = new CreateIssueComment('owner', 'repo', 123, 'Test comment');
+
+    expect($request->body()->all())->toBe(['body' => 'Test comment']);
+});
+
+it('CreatePullRequest has correct body', function () {
+    $data = ['title' => 'Test', 'head' => 'feature', 'base' => 'main'];
+    $request = new CreatePullRequest('owner', 'repo', $data);
+
+    expect($request->body()->all())->toBe($data);
+});
+
+it('CreatePullRequestComment has correct body', function () {
+    $request = new CreatePullRequestComment('owner', 'repo', 123, 'Test comment', 'file.php', 10);
+
+    expect($request->body()->all())->toBe([
+        'body' => 'Test comment',
+        'path' => 'file.php',
+        'line' => 10,
+    ]);
+});
+
+it('MergePullRequest has correct body', function () {
+    $request = new MergePullRequest('owner', 'repo', 123, ['merge_method' => 'squash']);
+
+    expect($request->body()->all())->toBe(['merge_method' => 'squash']);
+});
+
+it('UpdatePullRequest has correct body', function () {
+    $request = new UpdatePullRequest('owner', 'repo', 123, ['title' => 'Updated']);
+
+    expect($request->body()->all())->toBe(['title' => 'Updated']);
+});
+
+it('RequestReviewers has correct body with reviewers', function () {
+    $request = new RequestReviewers('owner', 'repo', 123, ['user1', 'user2'], []);
+
+    expect($request->body()->all())->toBe(['reviewers' => ['user1', 'user2']]);
+});
+
+it('RequestReviewers has correct body with team reviewers', function () {
+    $request = new RequestReviewers('owner', 'repo', 123, [], ['team1']);
+
+    expect($request->body()->all())->toBe(['team_reviewers' => ['team1']]);
+});
+
+it('RequestReviewers has correct body with both', function () {
+    $request = new RequestReviewers('owner', 'repo', 123, ['user1'], ['team1']);
+
+    expect($request->body()->all())->toBe([
+        'reviewers' => ['user1'],
+        'team_reviewers' => ['team1'],
+    ]);
+});
+
+it('RemoveReviewers has correct body with reviewers', function () {
+    $request = new RemoveReviewers('owner', 'repo', 123, ['user1'], []);
+
+    expect($request->body()->all())->toBe(['reviewers' => ['user1']]);
+});
+
+it('RemoveReviewers has correct body with team reviewers', function () {
+    $request = new RemoveReviewers('owner', 'repo', 123, [], ['team1']);
+
+    expect($request->body()->all())->toBe(['team_reviewers' => ['team1']]);
+});
+
+it('RemoveReviewers has correct body with both', function () {
+    $request = new RemoveReviewers('owner', 'repo', 123, ['user1'], ['team1']);
+
+    expect($request->body()->all())->toBe([
+        'reviewers' => ['user1'],
+        'team_reviewers' => ['team1'],
+    ]);
+});
+
+// Query and Headers tests
+it('GetIssueTimeline has correct query parameters', function () {
+    $request = new GetIssueTimeline('owner', 'repo', 123, 50, 2);
+
+    expect($request->query()->all())->toBe(['per_page' => 50, 'page' => 2]);
+});
+
+it('GetIssueTimeline has correct headers', function () {
+    $request = new GetIssueTimeline('owner', 'repo', 123);
+
+    expect($request->headers()->all())->toHaveKey('Accept')
+        ->and($request->headers()->get('Accept'))->toBe('application/vnd.github.mockingbird-preview+json');
+});
+
+it('GetPullRequestDiff has correct headers', function () {
+    $request = new GetPullRequestDiff('owner', 'repo', 123);
+
+    expect($request->headers()->all())->toHaveKey('Accept')
+        ->and($request->headers()->get('Accept'))->toBe('application/vnd.github.v3.diff');
+});

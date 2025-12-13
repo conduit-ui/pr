@@ -253,6 +253,65 @@ it('can handle pull request without stats', function () {
         ->and($pr->changedFiles)->toBeNull();
 });
 
+it('can check if pull request is draft', function () {
+    $data = [
+        'number' => 123,
+        'title' => 'Draft PR',
+        'state' => 'open',
+        'user' => [
+            'id' => 1,
+            'login' => 'testuser',
+            'avatar_url' => 'https://example.com/avatar.jpg',
+            'html_url' => 'https://github.com/testuser',
+            'type' => 'User',
+        ],
+        'html_url' => 'https://github.com/owner/repo/pull/123',
+        'created_at' => '2025-01-01T00:00:00Z',
+        'updated_at' => '2025-01-01T00:00:00Z',
+        'draft' => true,
+        'head' => [
+            'ref' => 'feature-branch',
+            'sha' => 'abc123',
+            'user' => [
+                'id' => 1,
+                'login' => 'testuser',
+                'avatar_url' => 'https://example.com/avatar.jpg',
+                'html_url' => 'https://github.com/testuser',
+                'type' => 'User',
+            ],
+            'repo' => [
+                'id' => 1,
+                'name' => 'repo',
+                'full_name' => 'owner/repo',
+                'html_url' => 'https://github.com/owner/repo',
+                'private' => false,
+            ],
+        ],
+        'base' => [
+            'ref' => 'main',
+            'sha' => 'def456',
+            'user' => [
+                'id' => 1,
+                'login' => 'testuser',
+                'avatar_url' => 'https://example.com/avatar.jpg',
+                'html_url' => 'https://github.com/testuser',
+                'type' => 'User',
+            ],
+            'repo' => [
+                'id' => 1,
+                'name' => 'repo',
+                'full_name' => 'owner/repo',
+                'html_url' => 'https://github.com/owner/repo',
+                'private' => false,
+            ],
+        ],
+    ];
+
+    $pr = PullRequest::fromArray($data);
+
+    expect($pr->isDraft())->toBeTrue();
+});
+
 it('can serialize pull request with stats to array', function () {
     $data = [
         'number' => 123,

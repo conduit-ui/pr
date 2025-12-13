@@ -663,6 +663,36 @@ it('can get reviews from pull request', function () {
         ->and($reviews[0]->state)->toBe('APPROVED');
 });
 
+it('can get pull request review comments', function () {
+    $mockComments = [
+        [
+            'id' => 1,
+            'user' => [
+                'id' => 1,
+                'login' => 'commenter',
+                'avatar_url' => 'https://example.com/avatar.jpg',
+                'html_url' => 'https://github.com/commenter',
+                'type' => 'User',
+            ],
+            'body' => 'Nice code!',
+            'html_url' => 'https://github.com/owner/repo/pull/123#discussion_r1',
+            'created_at' => '2025-01-01T10:00:00Z',
+            'updated_at' => '2025-01-01T10:00:00Z',
+        ],
+    ];
+
+    $connector = createMockConnector([$mockComments]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $comments = $pr->comments();
+
+    expect($comments)->toBeArray()
+        ->and($comments)->toHaveCount(1)
+        ->and($comments[0])->toBeInstanceOf(Comment::class)
+        ->and($comments[0]->body)->toBe('Nice code!');
+});
+
 it('can convert pull request to array', function () {
     $connector = createMockConnector([]);
     $prData = createTestPullRequestData();

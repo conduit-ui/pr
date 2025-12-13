@@ -46,20 +46,6 @@ class PullRequests
     }
 
     /**
-     * Get the default connector or throw an exception
-     */
-    protected static function connector(): Connector
-    {
-        if (self::$defaultConnector === null) {
-            throw new \RuntimeException(
-                'GitHub connector not configured. Call PullRequests::setConnector() or setService() first.'
-            );
-        }
-
-        return self::$defaultConnector;
-    }
-
-    /**
      * Get the PR service or throw an exception
      */
     protected static function service(): PrServiceInterface
