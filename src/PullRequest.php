@@ -227,7 +227,6 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
     }
 
     /**
-/**
      * Get the raw diff text for this pull request.
      */
     public function diff(): string
