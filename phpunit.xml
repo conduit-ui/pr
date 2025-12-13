@@ -15,5 +15,8 @@
         <include>
             <directory>src</directory>
         </include>
+        <exclude>
+            <file>src/PrServiceProvider.php</file>
+        </exclude>
     </source>
 </phpunit>
