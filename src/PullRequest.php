@@ -5,30 +5,43 @@ declare(strict_types=1);
 namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
+use ConduitUI\Pr\Contracts\Assignable;
+use ConduitUI\Pr\Contracts\Auditable;
+use ConduitUI\Pr\Contracts\Checkable;
+use ConduitUI\Pr\Contracts\Closeable;
+use ConduitUI\Pr\Contracts\Commentable;
+use ConduitUI\Pr\Contracts\Diffable;
+use ConduitUI\Pr\Contracts\HasCommits;
+use ConduitUI\Pr\Contracts\Labelable;
+use ConduitUI\Pr\Contracts\Mergeable;
+use ConduitUI\Pr\Contracts\Reviewable;
 use ConduitUI\Pr\DataTransferObjects\CheckRun;
 use ConduitUI\Pr\DataTransferObjects\Comment;
 use ConduitUI\Pr\DataTransferObjects\Commit;
 use ConduitUI\Pr\DataTransferObjects\File;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\DataTransferObjects\Review;
+use ConduitUI\Pr\Requests\AddAssignees;
 use ConduitUI\Pr\Requests\AddIssueLabels;
 use ConduitUI\Pr\Requests\CreateIssueComment;
 use ConduitUI\Pr\Requests\CreatePullRequestComment;
 use ConduitUI\Pr\Requests\CreatePullRequestReview;
 use ConduitUI\Pr\Requests\GetCommitCheckRuns;
 use ConduitUI\Pr\Requests\GetIssueComments;
+use ConduitUI\Pr\Requests\GetIssueTimeline;
 use ConduitUI\Pr\Requests\GetPullRequestComments;
 use ConduitUI\Pr\Requests\GetPullRequestCommits;
 use ConduitUI\Pr\Requests\GetPullRequestDiff;
 use ConduitUI\Pr\Requests\GetPullRequestFiles;
 use ConduitUI\Pr\Requests\GetPullRequestReviews;
 use ConduitUI\Pr\Requests\MergePullRequest;
+use ConduitUI\Pr\Requests\RemoveAssignees;
 use ConduitUI\Pr\Requests\RemoveIssueLabel;
 use ConduitUI\Pr\Requests\RemoveReviewers;
 use ConduitUI\Pr\Requests\RequestReviewers;
 use ConduitUI\Pr\Requests\UpdatePullRequest;
 
-class PullRequest
+class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commentable, Diffable, HasCommits, Labelable, Mergeable, Reviewable
 {
     public function __construct(
         protected Connector $connector,
@@ -37,12 +50,12 @@ class PullRequest
         public readonly PullRequestData $data,
     ) {}
 
-    public function approve(?string $body = null): self
+    public function approve(?string $body = null): static
     {
         return $this->submitReview('APPROVE', $body);
     }
 
-    public function requestChanges(string $body): self
+    public function requestChanges(string $body): static
     {
         return $this->submitReview('REQUEST_CHANGES', $body);
     }
@@ -52,7 +65,7 @@ class PullRequest
      *
      * @param  array<int, array{path: string, line: int, body: string}>  $comments
      */
-    public function submitReview(string $event, ?string $body = null, array $comments = []): self
+    public function submitReview(string $event, ?string $body = null, array $comments = []): static
     {
         $this->connector->send(new CreatePullRequestReview(
             $this->owner,
@@ -66,7 +79,7 @@ class PullRequest
         return $this;
     }
 
-    public function comment(string $body, ?int $line = null, ?string $path = null): self
+    public function comment(string $body, ?int $line = null, ?string $path = null): static
     {
         if ($line !== null && $path !== null) {
             $this->connector->send(new CreatePullRequestComment(
@@ -89,7 +102,7 @@ class PullRequest
         return $this;
     }
 
-    public function merge(string $method = 'merge', ?string $title = null, ?string $message = null): self
+    public function merge(string $method = 'merge', ?string $title = null, ?string $message = null): static
     {
         $payload = ['merge_method' => $method];
 
@@ -111,7 +124,7 @@ class PullRequest
         return $this;
     }
 
-    public function close(): self
+    public function close(): static
     {
         $this->connector->send(new UpdatePullRequest(
             $this->owner,
@@ -123,7 +136,7 @@ class PullRequest
         return $this;
     }
 
-    public function reopen(): self
+    public function reopen(): static
     {
         $this->connector->send(new UpdatePullRequest(
             $this->owner,
@@ -138,7 +151,7 @@ class PullRequest
     /**
      * @param  array<string, mixed>  $attributes
      */
-    public function update(array $attributes): self
+    public function update(array $attributes): static
     {
         $this->connector->send(new UpdatePullRequest(
             $this->owner,
@@ -310,7 +323,7 @@ class PullRequest
     /**
      * @param  array<int, string>  $labels
      */
-    public function addLabels(array $labels): self
+    public function addLabels(array $labels): static
     {
         $this->connector->send(new AddIssueLabels(
             $this->owner,
@@ -322,7 +335,7 @@ class PullRequest
         return $this;
     }
 
-    public function removeLabel(string $label): self
+    public function removeLabel(string $label): static
     {
         $this->connector->send(new RemoveIssueLabel(
             $this->owner,
@@ -338,7 +351,7 @@ class PullRequest
      * @param  array<int, string>  $reviewers
      * @param  array<int, string>  $teamReviewers
      */
-    public function addReviewers(array $reviewers, array $teamReviewers = []): self
+    public function addReviewers(array $reviewers, array $teamReviewers = []): static
     {
         $this->connector->send(new RequestReviewers(
             $this->owner,
@@ -355,7 +368,7 @@ class PullRequest
      * @param  array<int, string>  $reviewers
      * @param  array<int, string>  $teamReviewers
      */
-    public function removeReviewers(array $reviewers, array $teamReviewers = []): self
+    public function removeReviewers(array $reviewers, array $teamReviewers = []): static
     {
         $this->connector->send(new RemoveReviewers(
             $this->owner,
@@ -366,6 +379,69 @@ class PullRequest
         ));
 
         return $this;
+    }
+
+    /**
+     * @param  array<int, string>  $assignees
+     */
+    public function assign(array $assignees): static
+    {
+        $this->connector->send(new AddAssignees(
+            $this->owner,
+            $this->repo,
+            $this->data->number,
+            $assignees
+        ));
+
+        return $this;
+    }
+
+    /**
+     * @param  array<int, string>  $assignees
+     */
+    public function unassign(array $assignees): static
+    {
+        $this->connector->send(new RemoveAssignees(
+            $this->owner,
+            $this->repo,
+            $this->data->number,
+            $assignees
+        ));
+
+        return $this;
+    }
+
+    /**
+     * Get the timeline of events for this pull request (paginated, fetches all pages).
+     *
+     * @return array<int, mixed>
+     */
+    public function timeline(): array
+    {
+        $allEvents = [];
+        $page = 1;
+        $perPage = 100;
+
+        do {
+            $response = $this->connector->send(new GetIssueTimeline(
+                $this->owner,
+                $this->repo,
+                $this->data->number,
+                $perPage,
+                $page
+            ));
+
+            $events = $response->json();
+
+            if (empty($events)) {
+                break;
+            }
+
+            $allEvents = array_merge($allEvents, $events);
+            $page++;
+        } while (count($events) === $perPage);
+
+        return $allEvents;
     }
 
     public function __get(string $name): mixed

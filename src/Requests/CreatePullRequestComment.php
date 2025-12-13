@@ -19,7 +19,7 @@ class CreatePullRequestComment extends Request implements HasBody
         protected string $owner,
         protected string $repo,
         protected int $number,
-        protected string $body,
+        protected string $commentBody,
         protected string $path,
         protected int $line,
     ) {}
@@ -35,7 +35,7 @@ class CreatePullRequestComment extends Request implements HasBody
     protected function defaultBody(): array
     {
         return [
-            'body' => $this->body,
+            'body' => $this->commentBody,
             'path' => $this->path,
             'line' => $this->line,
         ];
