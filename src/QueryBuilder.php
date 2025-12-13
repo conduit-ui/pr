@@ -101,9 +101,12 @@ class QueryBuilder
      */
     public function get(): array
     {
-        if (! $this->owner || ! $this->repo) {
+        if ($this->owner === null || $this->repo === null) {
             throw new \InvalidArgumentException('Repository is required. Use repository("owner/repo") first.');
         }
+
+        $owner = $this->owner;
+        $repo = $this->repo;
 
         $params = array_merge($this->filters, [
             'sort' => $this->sort,
@@ -117,17 +120,20 @@ class QueryBuilder
         }
 
         $response = $this->connector->send(new ListPullRequests(
-            $this->owner,
-            $this->repo,
+            $owner,
+            $repo,
             $params
         ));
 
         return array_values(array_map(
-            fn (array $data) => new PullRequest(
+            /**
+             * @param  array<string, mixed>  $data
+             */
+            fn (mixed $data) => new PullRequest(
                 $this->connector,
-                $this->owner,
-                $this->repo,
-                PullRequestData::fromArray($data)
+                $owner,
+                $repo,
+                PullRequestData::fromArray($data) // @phpstan-ignore-line
             ),
             $response->json()
         ));

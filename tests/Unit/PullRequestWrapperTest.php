@@ -476,3 +476,241 @@ it('returns empty array when no checks', function () {
     expect($checks)->toBeArray()
         ->and($checks)->toBeEmpty();
 });
+
+it('can assign users to pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->assign(['user1', 'user2']);
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can unassign users from pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->unassign(['user1']);
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can get timeline from pull request', function () {
+    $mockTimeline = [
+        [
+            'event' => 'labeled',
+            'label' => ['name' => 'bug'],
+            'created_at' => '2025-01-01T10:00:00Z',
+        ],
+        [
+            'event' => 'commented',
+            'body' => 'This is a comment',
+            'created_at' => '2025-01-01T11:00:00Z',
+        ],
+    ];
+
+    $connector = createMockConnector([$mockTimeline]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $timeline = $pr->timeline();
+
+    expect($timeline)->toBeArray()
+        ->and($timeline)->toHaveCount(2)
+        ->and($timeline[0]['event'])->toBe('labeled')
+        ->and($timeline[1]['event'])->toBe('commented');
+});
+
+it('returns empty array when no timeline events', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $timeline = $pr->timeline();
+
+    expect($timeline)->toBeArray()
+        ->and($timeline)->toBeEmpty();
+});
+
+it('can add labels to pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->addLabels(['bug', 'enhancement']);
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can remove label from pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->removeLabel('bug');
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can add reviewers to pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->addReviewers(['reviewer1'], ['team1']);
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can remove reviewers from pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->removeReviewers(['reviewer1'], ['team1']);
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can close pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->close();
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can reopen pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->reopen();
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can update pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->update(['title' => 'New title']);
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can merge pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->merge('squash', 'Commit title', 'Commit message');
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can add comment to pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->comment('This is a comment');
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can add inline comment to pull request', function () {
+    $connector = createMockConnector([[]]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $result = $pr->comment('Inline comment', 10, 'src/file.php');
+
+    expect($result)->toBeInstanceOf(PullRequest::class);
+});
+
+it('can get reviews from pull request', function () {
+    $mockReviews = [
+        [
+            'id' => 1,
+            'user' => [
+                'id' => 1,
+                'login' => 'reviewer1',
+                'avatar_url' => 'https://example.com/avatar.jpg',
+                'html_url' => 'https://github.com/reviewer1',
+                'type' => 'User',
+            ],
+            'body' => 'Looks good!',
+            'state' => 'APPROVED',
+            'html_url' => 'https://github.com/owner/repo/pull/123#pullrequestreview-1',
+            'submitted_at' => '2025-01-01T10:00:00Z',
+        ],
+    ];
+
+    $connector = createMockConnector([$mockReviews]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $reviews = $pr->reviews();
+
+    expect($reviews)->toBeArray()
+        ->and($reviews)->toHaveCount(1)
+        ->and($reviews[0]->state)->toBe('APPROVED');
+});
+
+it('can get pull request review comments', function () {
+    $mockComments = [
+        [
+            'id' => 1,
+            'user' => [
+                'id' => 1,
+                'login' => 'commenter',
+                'avatar_url' => 'https://example.com/avatar.jpg',
+                'html_url' => 'https://github.com/commenter',
+                'type' => 'User',
+            ],
+            'body' => 'Nice code!',
+            'html_url' => 'https://github.com/owner/repo/pull/123#discussion_r1',
+            'created_at' => '2025-01-01T10:00:00Z',
+            'updated_at' => '2025-01-01T10:00:00Z',
+        ],
+    ];
+
+    $connector = createMockConnector([$mockComments]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $comments = $pr->comments();
+
+    expect($comments)->toBeArray()
+        ->and($comments)->toHaveCount(1)
+        ->and($comments[0])->toBeInstanceOf(Comment::class)
+        ->and($comments[0]->body)->toBe('Nice code!');
+});
+
+it('can convert pull request to array', function () {
+    $connector = createMockConnector([]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $array = $pr->toArray();
+
+    expect($array)->toBeArray()
+        ->and($array['number'])->toBe(123)
+        ->and($array['title'])->toBe('Test PR');
+});
+
+it('can access pull request data via magic getter', function () {
+    $connector = createMockConnector([]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    expect($pr->number)->toBe(123)
+        ->and($pr->title)->toBe('Test PR')
+        ->and($pr->state)->toBe('open');
+});

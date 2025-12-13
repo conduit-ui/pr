@@ -1,5 +1,5 @@
 parameters:
-    level: 8
+    level: 9
     paths:
         - src
     excludePaths:
@@ -7,6 +7,4 @@ parameters:
         # in the non-Laravel test environment. The class is only used in Laravel apps.
         - src/PrServiceProvider.php
     tmpDir: build/phpstan
-    ignoreErrors:
-        -
-            identifier: missingType.iterableValue
+    reportUnmatchedIgnoredErrors: true

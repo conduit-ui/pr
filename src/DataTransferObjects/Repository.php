@@ -14,6 +14,9 @@ class Repository
         public readonly bool $private,
     ) {}
 
+    /**
+     * @param  array{id: int, name: string, full_name: string, html_url: string, private: bool}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -25,6 +28,9 @@ class Repository
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

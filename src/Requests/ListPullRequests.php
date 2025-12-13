@@ -24,6 +24,6 @@ class ListPullRequests extends Request
     {
         $query = http_build_query($this->filters);
 
-        return "/repos/{$this->owner}/{$this->repo}/pulls".($query ? "?{$query}" : '');
+        return "/repos/{$this->owner}/{$this->repo}/pulls".($query !== '' ? "?{$query}" : '');
     }
 }

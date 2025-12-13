@@ -43,7 +43,7 @@ class CreatePullRequestReview extends Request implements HasBody
             $payload['body'] = $this->reviewBody;
         }
 
-        if (! empty($this->comments)) {
+        if ($this->comments !== []) {
             $payload['comments'] = $this->comments;
         }
 

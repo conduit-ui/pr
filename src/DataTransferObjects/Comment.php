@@ -17,6 +17,9 @@ class Comment
         public readonly DateTimeImmutable $updatedAt,
     ) {}
 
+    /**
+     * @param  array{id: int, user: array{id: int, login: string, avatar_url: string, html_url: string, type: string}, body: string, html_url: string, created_at: string, updated_at: string}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -29,6 +32,9 @@ class Comment
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

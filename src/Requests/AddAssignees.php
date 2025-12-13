@@ -9,22 +9,25 @@ use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Traits\Body\HasJsonBody;
 
-class CreateIssueComment extends Request implements HasBody
+class AddAssignees extends Request implements HasBody
 {
     use HasJsonBody;
 
     protected Method $method = Method::POST;
 
+    /**
+     * @param  array<int, string>  $assignees
+     */
     public function __construct(
         protected string $owner,
         protected string $repo,
         protected int $number,
-        protected string $commentBody,
+        protected array $assignees,
     ) {}
 
     public function resolveEndpoint(): string
     {
-        return "/repos/{$this->owner}/{$this->repo}/issues/{$this->number}/comments";
+        return "/repos/{$this->owner}/{$this->repo}/issues/{$this->number}/assignees";
     }
 
     /**
@@ -32,6 +35,6 @@ class CreateIssueComment extends Request implements HasBody
      */
     protected function defaultBody(): array
     {
-        return ['body' => $this->commentBody];
+        return ['assignees' => $this->assignees];
     }
 }

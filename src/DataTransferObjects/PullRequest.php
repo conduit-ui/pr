@@ -8,6 +8,11 @@ use DateTimeImmutable;
 
 class PullRequest
 {
+    /**
+     * @param  array<int, User>  $assignees
+     * @param  array<int, User>  $requestedReviewers
+     * @param  array<int, Label>  $labels
+     */
     public function __construct(
         public readonly int $number,
         public readonly string $title,
@@ -32,6 +37,9 @@ class PullRequest
         public readonly Base $base,
     ) {}
 
+    /**
+     * @param  array{number: int, title: string, body?: string|null, state: string, user: array{id: int, login: string, avatar_url: string, html_url: string, type: string}, html_url: string, created_at: string, updated_at: string, closed_at?: string|null, merged_at?: string|null, merge_commit_sha?: string|null, draft?: bool, additions?: int|null, deletions?: int|null, changed_files?: int|null, assignee?: array{id: int, login: string, avatar_url: string, html_url: string, type: string}|null, assignees?: array<int, array{id: int, login: string, avatar_url: string, html_url: string, type: string}>, requested_reviewers?: array<int, array{id: int, login: string, avatar_url: string, html_url: string, type: string}>, labels?: array<int, array{id: int, name: string, color: string, description?: string|null}>, head: array{ref: string, sha: string, user: array{id: int, login: string, avatar_url: string, html_url: string, type: string}, repo: array{id: int, name: string, full_name: string, html_url: string, private: bool}}, base: array{ref: string, sha: string, user: array{id: int, login: string, avatar_url: string, html_url: string, type: string}, repo: array{id: int, name: string, full_name: string, html_url: string, private: bool}}}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -79,6 +87,9 @@ class PullRequest
         return $this->draft;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

@@ -16,6 +16,9 @@ class Commit
         public readonly ?User $githubCommitter,
     ) {}
 
+    /**
+     * @param  array{sha: string, commit: array{message: string, author: array{name: string, email: string, date: string}, committer: array{name: string, email: string, date: string}}, html_url: string, author?: array{id: int, login: string, avatar_url: string, html_url: string, type: string}|null, committer?: array{id: int, login: string, avatar_url: string, html_url: string, type: string}|null}  $data
+     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -29,6 +32,9 @@ class Commit
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
