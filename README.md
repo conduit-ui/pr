@@ -4,6 +4,7 @@ Stop context-switching between PRs. Start automating approvals, merges, and bulk
 
 Approve, merge, request changes, and manage pull requests at scale with expressive PHP code. Built for teams shipping multiple releases per day.
 
+[![Sentinel Certified](https://img.shields.io/github/actions/workflow/status/conduit-ui/pr/gate.yml?label=Sentinel%20Certified&style=flat-square)](https://github.com/conduit-ui/pr/actions/workflows/gate.yml)
 [![Latest Version](https://img.shields.io/packagist/v/conduit-ui/pr.svg?style=flat-square)](https://packagist.org/packages/conduit-ui/pr)
 [![MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/conduit-ui/pr.svg?style=flat-square)](https://packagist.org/packages/conduit-ui/pr)
