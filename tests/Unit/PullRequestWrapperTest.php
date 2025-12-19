@@ -656,7 +656,7 @@ it('can get reviews from pull request', function () {
     $prData = createTestPullRequestData();
     $pr = new PullRequest($connector, 'owner', 'repo', $prData);
 
-    $reviews = $pr->reviews();
+    $reviews = $pr->reviews()->get();
 
     expect($reviews)->toBeArray()
         ->and($reviews)->toHaveCount(1)
