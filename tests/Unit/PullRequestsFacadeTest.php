@@ -209,20 +209,20 @@ it('instance list returns array of pull requests', function () {
         ->and($results[0])->toBeInstanceOf(PullRequest::class);
 });
 
-it('instance open returns open pull requests', function () {
+it('instance listOpen returns open pull requests', function () {
     $connector = createFacadeTestConnector([[createFacadeMockPrData()]]);
     $prs = new PullRequests($connector, 'owner', 'repo');
 
-    $results = $prs->open();
+    $results = $prs->listOpen();
 
     expect($results)->toBeArray();
 });
 
-it('instance closed returns closed pull requests', function () {
+it('instance listClosed returns closed pull requests', function () {
     $connector = createFacadeTestConnector([[createFacadeMockPrData()]]);
     $prs = new PullRequests($connector, 'owner', 'repo');
 
-    $results = $prs->closed();
+    $results = $prs->listClosed();
 
     expect($results)->toBeArray();
 });
