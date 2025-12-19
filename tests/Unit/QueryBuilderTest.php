@@ -260,3 +260,102 @@ it('can chain multiple filters', function () {
     expect($results)->toBeArray()
         ->and($results)->toHaveCount(1);
 });
+
+it('can filter by merged state', function () {
+    $mergedPrData = createMockPrData();
+    $mergedPrData['merged_at'] = '2025-01-02T00:00:00Z';
+
+    $connector = createQueryBuilderConnector([$mergedPrData]);
+    $builder = new QueryBuilder($connector);
+
+    $result = $builder->repository('owner/repo')->whereMerged();
+
+    expect($result)->toBeInstanceOf(QueryBuilder::class);
+});
+
+it('can filter by draft state', function () {
+    $draftPrData = createMockPrData();
+    $draftPrData['draft'] = true;
+
+    $connector = createQueryBuilderConnector([$draftPrData]);
+    $builder = new QueryBuilder($connector);
+
+    $result = $builder->repository('owner/repo')->whereDraft();
+
+    expect($result)->toBeInstanceOf(QueryBuilder::class);
+});
+
+it('can filter by base branch', function () {
+    $connector = createQueryBuilderConnector([createMockPrData()]);
+    $builder = new QueryBuilder($connector);
+
+    $result = $builder->repository('owner/repo')->whereBase('main');
+
+    expect($result)->toBeInstanceOf(QueryBuilder::class);
+});
+
+it('can filter by head branch', function () {
+    $connector = createQueryBuilderConnector([createMockPrData()]);
+    $builder = new QueryBuilder($connector);
+
+    $result = $builder->repository('owner/repo')->whereHead('user:feature-branch');
+
+    expect($result)->toBeInstanceOf(QueryBuilder::class);
+});
+
+it('implements PullRequestQueryInterface', function () {
+    $connector = createQueryBuilderConnector([]);
+    $builder = new QueryBuilder($connector);
+
+    expect($builder)->toBeInstanceOf(\ConduitUI\Pr\Contracts\PullRequestQueryInterface::class);
+});
+
+it('can chain new filters with existing filters', function () {
+    $connector = createQueryBuilderConnector([createMockPrData()]);
+    $builder = new QueryBuilder($connector);
+
+    $results = $builder
+        ->repository('owner/repo')
+        ->whereBase('main')
+        ->whereHead('user:feature')
+        ->whereDraft()
+        ->author('testuser')
+        ->get();
+
+    expect($results)->toBeArray();
+});
+
+it('filters merged pull requests client-side', function () {
+    $mergedPrData = createMockPrData();
+    $mergedPrData['merged_at'] = '2025-01-02T00:00:00Z';
+
+    $openPrData = createMockPrData();
+    $openPrData['number'] = 2;
+
+    $connector = createQueryBuilderConnector([$mergedPrData, $openPrData]);
+    $builder = new QueryBuilder($connector);
+
+    $results = $builder->repository('owner/repo')->all()->whereMerged()->get();
+
+    expect($results)->toBeArray()
+        ->and($results)->toHaveCount(1)
+        ->and($results[0]->data->isMerged())->toBeTrue();
+});
+
+it('filters draft pull requests client-side', function () {
+    $draftPrData = createMockPrData();
+    $draftPrData['draft'] = true;
+
+    $nonDraftPrData = createMockPrData();
+    $nonDraftPrData['number'] = 2;
+    $nonDraftPrData['draft'] = false;
+
+    $connector = createQueryBuilderConnector([$draftPrData, $nonDraftPrData]);
+    $builder = new QueryBuilder($connector);
+
+    $results = $builder->repository('owner/repo')->whereDraft()->get();
+
+    expect($results)->toBeArray()
+        ->and($results)->toHaveCount(1)
+        ->and($results[0]->data->isDraft())->toBeTrue();
+});
