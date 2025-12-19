@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace ConduitUI\Pr\Contracts;
 
-use ConduitUI\Pr\DataTransferObjects\Review;
+use ConduitUI\Pr\Services\ReviewBuilder;
+use ConduitUI\Pr\Services\ReviewQuery;
 
 /**
  * Interface for entities that can receive code reviews.
@@ -14,24 +15,27 @@ use ConduitUI\Pr\DataTransferObjects\Review;
 interface Reviewable
 {
     /**
-     * Get all reviews for this entity.
-     *
-     * @return array<int, Review>
+     * Get a query builder for reviews.
      */
-    public function reviews(): array;
+    public function reviews(): ReviewQuery;
 
     /**
-     * Approve this entity.
+     * Create a review builder for approving.
      */
-    public function approve(?string $body = null): static;
+    public function approve(?string $body = null): ReviewBuilder;
 
     /**
-     * Request changes on this entity.
+     * Create a review builder for requesting changes.
      */
-    public function requestChanges(string $body): static;
+    public function requestChanges(?string $body = null): ReviewBuilder;
 
     /**
-     * Submit a review with a specific event type.
+     * Create a new review builder.
+     */
+    public function review(): ReviewBuilder;
+
+    /**
+     * Submit a review with a specific event type (legacy method).
      *
      * @param  string  $event  APPROVE, REQUEST_CHANGES, or COMMENT
      * @param  array<int, array{path: string, line: int, body: string}>  $comments  Inline comments

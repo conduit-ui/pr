@@ -41,8 +41,17 @@ class ReviewTestConnector extends Connector
 
         return new MockReviewResponse([
             'id' => 1,
+            'user' => [
+                'id' => 1,
+                'login' => 'reviewer',
+                'avatar_url' => 'https://example.com/avatar.jpg',
+                'html_url' => 'https://github.com/reviewer',
+                'type' => 'User',
+            ],
             'state' => 'APPROVED',
             'body' => 'LGTM',
+            'html_url' => 'https://github.com/owner/repo/pull/1#pullrequestreview-1',
+            'submitted_at' => '2025-01-01T10:00:00Z',
         ]);
     }
 }
@@ -184,12 +193,12 @@ it('can submit review with only inline comments', function () {
         ->and($body['comments'])->toHaveCount(1);
 });
 
-it('approve method uses submitReview', function () {
+it('approve method returns ReviewBuilder', function () {
     $connector = createReviewTestConnector();
     $prData = createReviewTestPullRequestData();
     $pr = new PullRequest($connector, 'owner', 'repo', $prData);
 
-    $pr->approve('LGTM');
+    $pr->approve('LGTM')->submit();
 
     expect($connector->lastRequest)->toBeInstanceOf(CreatePullRequestReview::class);
 
@@ -200,12 +209,12 @@ it('approve method uses submitReview', function () {
         ->and($body)->not->toHaveKey('comments');
 });
 
-it('requestChanges method uses submitReview', function () {
+it('requestChanges method returns ReviewBuilder', function () {
     $connector = createReviewTestConnector();
     $prData = createReviewTestPullRequestData();
     $pr = new PullRequest($connector, 'owner', 'repo', $prData);
 
-    $pr->requestChanges('Please fix these issues');
+    $pr->requestChanges('Please fix these issues')->submit();
 
     expect($connector->lastRequest)->toBeInstanceOf(CreatePullRequestReview::class);
 

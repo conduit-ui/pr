@@ -33,13 +33,14 @@ use ConduitUI\Pr\Requests\GetPullRequestComments;
 use ConduitUI\Pr\Requests\GetPullRequestCommits;
 use ConduitUI\Pr\Requests\GetPullRequestDiff;
 use ConduitUI\Pr\Requests\GetPullRequestFiles;
-use ConduitUI\Pr\Requests\GetPullRequestReviews;
 use ConduitUI\Pr\Requests\MergePullRequest;
 use ConduitUI\Pr\Requests\RemoveAssignees;
 use ConduitUI\Pr\Requests\RemoveIssueLabel;
 use ConduitUI\Pr\Requests\RemoveReviewers;
 use ConduitUI\Pr\Requests\RequestReviewers;
 use ConduitUI\Pr\Requests\UpdatePullRequest;
+use ConduitUI\Pr\Services\ReviewBuilder;
+use ConduitUI\Pr\Services\ReviewQuery;
 
 class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commentable, Diffable, HasCommits, Labelable, Mergeable, Reviewable
 {
@@ -50,14 +51,32 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
         public readonly PullRequestData $data,
     ) {}
 
-    public function approve(?string $body = null): static
+    /**
+     * Create a new review builder for approving a pull request.
+     */
+    public function approve(?string $body = null): ReviewBuilder
     {
-        return $this->submitReview('APPROVE', $body);
+        $builder = new ReviewBuilder($this->connector, "{$this->owner}/{$this->repo}", $this->data->number);
+
+        return $builder->approve($body);
     }
 
-    public function requestChanges(string $body): static
+    /**
+     * Create a new review builder for requesting changes.
+     */
+    public function requestChanges(?string $body = null): ReviewBuilder
     {
-        return $this->submitReview('REQUEST_CHANGES', $body);
+        $builder = new ReviewBuilder($this->connector, "{$this->owner}/{$this->repo}", $this->data->number);
+
+        return $builder->requestChanges($body);
+    }
+
+    /**
+     * Create a new review builder for commenting.
+     */
+    public function review(): ReviewBuilder
+    {
+        return new ReviewBuilder($this->connector, "{$this->owner}/{$this->repo}", $this->data->number);
     }
 
     /**
@@ -164,24 +183,11 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
     }
 
     /**
-     * @return array<int, Review>
+     * Get a review query builder for this pull request.
      */
-    public function reviews(): array
+    public function reviews(): ReviewQuery
     {
-        $response = $this->connector->send(new GetPullRequestReviews(
-            $this->owner,
-            $this->repo,
-            $this->data->number
-        ));
-
-        /** @var array<int, array<string, mixed>> $items */
-        $items = $response->json();
-
-        return array_values(array_map(
-            /** @param array<string, mixed> $data */
-            fn (mixed $data): Review => Review::fromArray($data), // @phpstan-ignore-line
-            $items
-        ));
+        return new ReviewQuery($this->connector, "{$this->owner}/{$this->repo}", $this->data->number);
     }
 
     /**
