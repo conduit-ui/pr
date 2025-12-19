@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
+use ConduitUI\Pr\Contracts\PullRequestQueryInterface;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\Requests\ListPullRequests;
 
-class QueryBuilder
+class QueryBuilder implements PullRequestQueryInterface
 {
     protected ?string $owner = null;
 
@@ -74,6 +75,38 @@ class QueryBuilder
         return $this;
     }
 
+    public function whereMerged(): self
+    {
+        // Note: GitHub API doesn't have a direct 'merged' filter
+        // This will need to be filtered client-side after fetching
+        $this->filters['_merged'] = true;
+
+        return $this;
+    }
+
+    public function whereDraft(): self
+    {
+        // Note: GitHub API doesn't have a direct 'draft' filter
+        // This will need to be filtered client-side after fetching
+        $this->filters['_draft'] = true;
+
+        return $this;
+    }
+
+    public function whereBase(string $branch): self
+    {
+        $this->filters['base'] = $branch;
+
+        return $this;
+    }
+
+    public function whereHead(string $branch): self
+    {
+        $this->filters['head'] = $branch;
+
+        return $this;
+    }
+
     public function orderBy(string $sort, string $direction = 'desc'): self
     {
         $this->sort = $sort;
@@ -108,7 +141,19 @@ class QueryBuilder
         $owner = $this->owner;
         $repo = $this->repo;
 
-        $params = array_merge($this->filters, [
+        // Separate client-side filters from API filters
+        $clientSideFilters = [];
+        $apiFilters = [];
+
+        foreach ($this->filters as $key => $value) {
+            if (str_starts_with($key, '_')) {
+                $clientSideFilters[$key] = $value;
+            } else {
+                $apiFilters[$key] = $value;
+            }
+        }
+
+        $params = array_merge($apiFilters, [
             'sort' => $this->sort,
             'direction' => $this->direction,
             'per_page' => $this->limit ?? 30,
@@ -125,7 +170,7 @@ class QueryBuilder
             $params
         ));
 
-        return array_values(array_map(
+        $results = array_map(
             /**
              * @param  array<string, mixed>  $data
              */
@@ -136,7 +181,18 @@ class QueryBuilder
                 PullRequestData::fromArray($data) // @phpstan-ignore-line
             ),
             $response->json()
-        ));
+        );
+
+        // Apply client-side filters
+        if (isset($clientSideFilters['_merged'])) {
+            $results = array_filter($results, fn (PullRequest $pr) => $pr->data->isMerged());
+        }
+
+        if (isset($clientSideFilters['_draft'])) {
+            $results = array_filter($results, fn (PullRequest $pr) => $pr->data->isDraft());
+        }
+
+        return array_values($results);
     }
 
     public function first(): ?PullRequest
