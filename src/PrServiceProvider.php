@@ -36,6 +36,23 @@ class PrServiceProvider extends ServiceProvider
         $this->app->singleton(GitHubPrService::class, function ($app) {
             return $app->make(PrServiceInterface::class);
         });
+
+        // Register PullRequests for facade support
+        $this->app->singleton(PullRequests::class, function ($app) {
+            // Return a proxy that allows both static and instance usage
+            return new class($app->make(PrServiceInterface::class))
+            {
+                public function __construct(private PrServiceInterface $service)
+                {
+                    PullRequests::setService($this->service);
+                }
+
+                public function __call(string $method, array $arguments): mixed
+                {
+                    return PullRequests::$method(...$arguments);
+                }
+            };
+        });
     }
 
     /**

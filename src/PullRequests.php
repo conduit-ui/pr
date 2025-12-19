@@ -94,6 +94,30 @@ class PullRequests
     }
 
     /**
+     * Get open pull requests for a repository (shorthand for for()->open())
+     */
+    public static function open(string $repository): QueryBuilder
+    {
+        return self::for($repository)->open();
+    }
+
+    /**
+     * Get closed pull requests for a repository (shorthand for for()->closed())
+     */
+    public static function closed(string $repository): QueryBuilder
+    {
+        return self::for($repository)->closed();
+    }
+
+    /**
+     * Get merged pull requests for a repository
+     */
+    public static function merged(string $repository): QueryBuilder
+    {
+        return self::service()->for($repository)->state('closed');
+    }
+
+    /**
      * Get a pull request by number
      */
     public function get(int $number): PullRequest
@@ -150,21 +174,21 @@ class PullRequests
     }
 
     /**
-     * Get only open pull requests
+     * Get only open pull requests (instance method)
      *
      * @return array<int, PullRequest>
      */
-    public function open(): array
+    public function listOpen(): array
     {
         return $this->list(['state' => 'open']);
     }
 
     /**
-     * Get only closed pull requests
+     * Get only closed pull requests (instance method)
      *
      * @return array<int, PullRequest>
      */
-    public function closed(): array
+    public function listClosed(): array
     {
         return $this->list(['state' => 'closed']);
     }
