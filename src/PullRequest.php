@@ -39,6 +39,8 @@ use ConduitUI\Pr\Requests\RemoveIssueLabel;
 use ConduitUI\Pr\Requests\RemoveReviewers;
 use ConduitUI\Pr\Requests\RequestReviewers;
 use ConduitUI\Pr\Requests\UpdatePullRequest;
+use ConduitUI\Pr\Services\AssigneeManager;
+use ConduitUI\Pr\Services\MilestoneManager;
 use ConduitUI\Pr\Services\ReviewBuilder;
 use ConduitUI\Pr\Services\ReviewQuery;
 
@@ -469,6 +471,32 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
         } while (count($events) === $perPage);
 
         return $allEvents;
+    }
+
+    /**
+     * Get an assignee manager for this pull request.
+     */
+    public function assignees(): AssigneeManager
+    {
+        return new AssigneeManager($this->connector, "{$this->owner}/{$this->repo}", $this->data->number);
+    }
+
+    /**
+     * Get a milestone manager for this pull request.
+     */
+    public function milestone(): MilestoneManager
+    {
+        return new MilestoneManager($this->connector, "{$this->owner}/{$this->repo}", $this->data->number);
+    }
+
+    /**
+     * Set the milestone for this pull request.
+     */
+    public function setMilestone(int $milestoneNumber): static
+    {
+        $this->milestone()->set($milestoneNumber);
+
+        return $this;
     }
 
     public function __get(string $name): mixed
