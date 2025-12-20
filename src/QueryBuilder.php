@@ -75,6 +75,38 @@ class QueryBuilder implements PullRequestQueryInterface
         return $this;
     }
 
+    /**
+     * Alias for label()
+     */
+    public function whereLabel(string $label): self
+    {
+        return $this->label($label);
+    }
+
+    /**
+     * Filter by multiple labels (match any)
+     *
+     * @param  array<int, string>  $labels
+     */
+    public function whereLabels(array $labels): self
+    {
+        $this->filters['labels'] = implode(',', $labels);
+
+        return $this;
+    }
+
+    /**
+     * Filter by multiple labels (match all) - client-side filter
+     *
+     * @param  array<int, string>  $labels
+     */
+    public function whereAllLabels(array $labels): self
+    {
+        $this->filters['_all_labels'] = $labels;
+
+        return $this;
+    }
+
     public function whereMerged(): self
     {
         // Note: GitHub API doesn't have a direct 'merged' filter
@@ -192,6 +224,21 @@ class QueryBuilder implements PullRequestQueryInterface
             $results = array_filter($results, fn (PullRequest $pr) => $pr->data->isDraft());
         }
 
+        if (isset($clientSideFilters['_all_labels'])) {
+            $requiredLabels = $clientSideFilters['_all_labels'];
+            $results = array_filter($results, function (PullRequest $pr) use ($requiredLabels): bool {
+                $prLabels = array_map(fn ($label) => $label->name ?? '', $pr->data->labels ?? []); // @phpstan-ignore-line
+
+                foreach ($requiredLabels as $required) {
+                    if (! in_array($required, $prLabels, true)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+        }
+
         return array_values($results);
     }
 
@@ -205,5 +252,85 @@ class QueryBuilder implements PullRequestQueryInterface
     public function count(): int
     {
         return count($this->get());
+    }
+
+    public function exists(): bool
+    {
+        return $this->count() > 0;
+    }
+
+    /**
+     * Pluck a single column from results
+     *
+     * @return array<int, mixed>
+     */
+    public function pluck(string $key): array
+    {
+        return array_map(
+            fn (PullRequest $pr) => $pr->data->{$key} ?? null, // @phpstan-ignore-line
+            $this->get()
+        );
+    }
+
+    /**
+     * Alias methods for state filters
+     */
+    public function whereOpen(): self
+    {
+        return $this->open();
+    }
+
+    public function whereClosed(): self
+    {
+        return $this->closed();
+    }
+
+    public function whereState(string $state): self
+    {
+        return $this->state($state);
+    }
+
+    public function whereAuthor(string $author): self
+    {
+        return $this->author($author);
+    }
+
+    /**
+     * Ordering shortcuts
+     */
+    public function orderByCreated(string $direction = 'desc'): self
+    {
+        return $this->orderBy('created', $direction);
+    }
+
+    public function orderByUpdated(string $direction = 'desc'): self
+    {
+        return $this->orderBy('updated', $direction);
+    }
+
+    public function orderByPopularity(): self
+    {
+        return $this->orderBy('popularity', 'desc');
+    }
+
+    public function orderByLongRunning(): self
+    {
+        return $this->orderBy('long-running', 'asc');
+    }
+
+    /**
+     * Pagination shortcuts
+     */
+    public function perPage(int $count): self
+    {
+        return $this->take($count);
+    }
+
+    /**
+     * Alias for repository()
+     */
+    public function repo(string $repository): self
+    {
+        return $this->repository($repository);
     }
 }
