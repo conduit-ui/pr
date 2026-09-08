@@ -9,6 +9,7 @@ use ConduitUI\Pr\Requests\CreatePullRequest;
 use ConduitUI\Pr\Requests\CreatePullRequestComment;
 use ConduitUI\Pr\Requests\CreatePullRequestReview;
 use ConduitUI\Pr\Requests\GetCommitCheckRuns;
+use ConduitUI\Pr\Requests\GetCompare;
 use ConduitUI\Pr\Requests\GetIssueComments;
 use ConduitUI\Pr\Requests\GetIssueTimeline;
 use ConduitUI\Pr\Requests\GetPullRequest;
@@ -77,6 +78,12 @@ it('GetCommitCheckRuns has correct endpoint', function () {
     $request = new GetCommitCheckRuns('owner', 'repo', 'abc123');
 
     expect($request->resolveEndpoint())->toBe('/repos/owner/repo/commits/abc123/check-runs');
+});
+
+it('GetCompare has correct endpoint', function () {
+    $request = new GetCompare('owner', 'repo', 'main', 'feature');
+
+    expect($request->resolveEndpoint())->toBe('/repos/owner/repo/compare/main...feature');
 });
 
 it('GetIssueComments has correct endpoint', function () {

@@ -323,7 +323,7 @@ it('works without connector for read-only operations', function () {
 it('throws exception when trying to perform actions without connector', function () {
     $pr = PullRequest::fromArray($this->prData);
 
-    expect(fn () => $pr->merge())->toThrow(\RuntimeException::class);
+    expect(fn () => $pr->merge())->toThrow(RuntimeException::class);
 });
 
 it('can use squashMerge helper', function () {

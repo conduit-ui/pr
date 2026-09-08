@@ -714,3 +714,39 @@ it('can access pull request data via magic getter', function () {
         ->and($pr->title)->toBe('Test PR')
         ->and($pr->state)->toBe('open');
 });
+
+it('can compare PR branches', function () {
+    $connector = createMockConnector([
+        [
+            'ahead_by' => 1,
+            'behind_by' => 3,
+            'status' => 'diverged',
+        ],
+    ]);
+    $prData = createTestPullRequestData();
+    $pr = new PullRequest($connector, 'owner', 'repo', $prData);
+
+    $comparison = $pr->compare();
+
+    expect($comparison)
+        ->aheadBy->toBe(1)
+        ->behindBy->toBe(3)
+        ->status->toBe('diverged');
+});
+
+it('can compare arbitrary branches', function () {
+    $connector = createMockConnector([
+        [
+            'ahead_by' => 2,
+            'behind_by' => 0,
+            'status' => 'ahead',
+        ],
+    ]);
+
+    $result = PullRequest::compareBranches($connector, 'owner', 'repo', 'main', 'feature');
+
+    expect($result)
+        ->aheadBy->toBe(2)
+        ->behindBy->toBe(0)
+        ->status->toBe('ahead');
+});

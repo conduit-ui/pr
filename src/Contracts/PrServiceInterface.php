@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ConduitUI\Pr\Contracts;
 
+use ConduitUI\Pr\DataTransferObjects\Comparison;
 use ConduitUI\Pr\PullRequest;
 use ConduitUI\Pr\QueryBuilder;
 
@@ -34,4 +35,6 @@ interface PrServiceInterface
      * @return array<int, PullRequest>
      */
     public function list(string $repository, array $filters = []): array;
+
+    public function compareBranches(string $owner, string $repo, string $base, string $head): Comparison;
 }

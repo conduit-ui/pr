@@ -6,10 +6,12 @@ namespace ConduitUI\Pr\Services;
 
 use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Pr\Contracts\PrServiceInterface;
+use ConduitUI\Pr\DataTransferObjects\Comparison;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\PullRequest;
 use ConduitUI\Pr\QueryBuilder;
 use ConduitUI\Pr\Requests\CreatePullRequest;
+use ConduitUI\Pr\Requests\GetCompare;
 use ConduitUI\Pr\Requests\GetPullRequest;
 use ConduitUI\Pr\Requests\ListPullRequests;
 use ConduitUI\Pr\Requests\MergePullRequest;
@@ -135,5 +137,15 @@ class GitHubPrService implements PrServiceInterface
             ),
             $response->json()
         ));
+    }
+
+    public function compareBranches(string $owner, string $repo, string $base, string $head): Comparison
+    {
+        $response = $this->connector->send(new GetCompare($owner, $repo, $base, $head));
+
+        /** @var array{ahead_by: int, behind_by: int, status: string} $data */
+        $data = $response->json();
+
+        return Comparison::fromArray($data);
     }
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use ConduitUi\GitHubConnector\Connector;
+use ConduitUI\Pr\Contracts\PullRequestQueryInterface;
 use ConduitUI\Pr\PullRequest;
 use ConduitUI\Pr\QueryBuilder;
 use Saloon\Http\Request;
@@ -307,7 +308,7 @@ it('implements PullRequestQueryInterface', function () {
     $connector = createQueryBuilderConnector([]);
     $builder = new QueryBuilder($connector);
 
-    expect($builder)->toBeInstanceOf(\ConduitUI\Pr\Contracts\PullRequestQueryInterface::class);
+    expect($builder)->toBeInstanceOf(PullRequestQueryInterface::class);
 });
 
 it('can chain new filters with existing filters', function () {

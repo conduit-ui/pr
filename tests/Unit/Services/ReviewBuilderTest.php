@@ -287,5 +287,5 @@ it('throws exception when submitting without event', function () {
     $builder = new ReviewBuilder($connector, 'owner/repo', 123);
 
     expect(fn () => $builder->submit())
-        ->toThrow(\InvalidArgumentException::class, 'Review event is required');
+        ->toThrow(InvalidArgumentException::class, 'Review event is required');
 });

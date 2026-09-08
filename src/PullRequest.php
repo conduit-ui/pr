@@ -18,6 +18,7 @@ use ConduitUI\Pr\Contracts\Reviewable;
 use ConduitUI\Pr\DataTransferObjects\CheckRun;
 use ConduitUI\Pr\DataTransferObjects\Comment;
 use ConduitUI\Pr\DataTransferObjects\Commit;
+use ConduitUI\Pr\DataTransferObjects\Comparison;
 use ConduitUI\Pr\DataTransferObjects\File;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\DataTransferObjects\Review;
@@ -27,6 +28,7 @@ use ConduitUI\Pr\Requests\CreateIssueComment;
 use ConduitUI\Pr\Requests\CreatePullRequestComment;
 use ConduitUI\Pr\Requests\CreatePullRequestReview;
 use ConduitUI\Pr\Requests\GetCommitCheckRuns;
+use ConduitUI\Pr\Requests\GetCompare;
 use ConduitUI\Pr\Requests\GetIssueComments;
 use ConduitUI\Pr\Requests\GetIssueTimeline;
 use ConduitUI\Pr\Requests\GetPullRequestComments;
@@ -246,6 +248,21 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
         ));
 
         return $response->body();
+    }
+
+    public function compare(): Comparison
+    {
+        $response = $this->connector->send(new GetCompare(
+            $this->owner,
+            $this->repo,
+            $this->data->base->ref,
+            $this->data->head->ref
+        ));
+
+        /** @var array{ahead_by: int, behind_by: int, status: string} $data */
+        $data = $response->json();
+
+        return Comparison::fromArray($data);
     }
 
     /**
@@ -502,6 +519,19 @@ class PullRequest implements Assignable, Auditable, Checkable, Closeable, Commen
     public function __get(string $name): mixed
     {
         return $this->data->{$name}; // @phpstan-ignore-line Variable property access is intentional for magic getter
+    }
+
+    /**
+     * Compare two branches for any repository.
+     */
+    public static function compareBranches(Connector $connector, string $owner, string $repo, string $base, string $head): Comparison
+    {
+        $response = $connector->send(new GetCompare($owner, $repo, $base, $head));
+
+        /** @var array{ahead_by: int, behind_by: int, status: string} $data */
+        $data = $response->json();
+
+        return Comparison::fromArray($data);
     }
 
     /**

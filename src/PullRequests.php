@@ -6,6 +6,7 @@ namespace ConduitUI\Pr;
 
 use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Pr\Contracts\PrServiceInterface;
+use ConduitUI\Pr\DataTransferObjects\Comparison;
 use ConduitUI\Pr\DataTransferObjects\PullRequest as PullRequestData;
 use ConduitUI\Pr\Requests\CreatePullRequest;
 use ConduitUI\Pr\Requests\GetPullRequest;
@@ -110,11 +111,25 @@ class PullRequests
     }
 
     /**
-     * Get merged pull requests for a repository
+     * Get only merged pull requests for a repository
      */
     public static function merged(string $repository): QueryBuilder
     {
         return self::service()->for($repository)->state('closed');
+    }
+
+    /**
+     * Compare two branches for a repository
+     */
+    public static function compareBranches(string $repository, string $base, string $head): Comparison
+    {
+        $service = self::service();
+
+        $parts = explode('/', $repository);
+        $owner = $parts[0];
+        $repo = $parts[1];
+
+        return $service->compareBranches($owner, $repo, $base, $head);
     }
 
     /**

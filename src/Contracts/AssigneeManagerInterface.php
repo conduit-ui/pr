@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ConduitUI\Pr\Contracts;
 
+use ConduitUI\Pr\DataTransferObjects\User;
 use Illuminate\Support\Collection;
 
 interface AssigneeManagerInterface
@@ -11,7 +12,7 @@ interface AssigneeManagerInterface
     /**
      * Get all assignees for the pull request.
      *
-     * @return Collection<int, \ConduitUI\Pr\DataTransferObjects\User>
+     * @return Collection<int, User>
      */
     public function get(): Collection;
 

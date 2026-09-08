@@ -7,6 +7,7 @@ namespace ConduitUI\Pr;
 use ConduitUi\GitHubConnector\Connector;
 use ConduitUI\Pr\Contracts\PrServiceInterface;
 use ConduitUI\Pr\Services\GitHubPrService;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 
 class PrServiceProvider extends ServiceProvider
@@ -76,7 +77,7 @@ class PrServiceProvider extends ServiceProvider
     /**
      * Resolve the GitHub token from available configuration sources.
      *
-     * @param  \Illuminate\Contracts\Foundation\Application  $app
+     * @param  Application  $app
      */
     private function resolveToken($app): ?string
     {

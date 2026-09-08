@@ -199,3 +199,20 @@ it('merged() returns query builder for merged PRs', function () {
 
     expect($query)->toBeInstanceOf(QueryBuilder::class);
 });
+
+it('compareBranches() compares two branches', function () {
+    $connector = createLaravelLaravelFacadeTestConnector([[
+        'ahead_by' => 2,
+        'behind_by' => 1,
+        'status' => 'diverged',
+    ]]);
+    $service = new GitHubPrService($connector);
+    PullRequests::setService($service);
+
+    $comparison = PullRequests::compareBranches('owner/repo', 'main', 'feature');
+
+    expect($comparison)
+        ->aheadBy->toBe(2)
+        ->behindBy->toBe(1)
+        ->status->toBe('diverged');
+});
